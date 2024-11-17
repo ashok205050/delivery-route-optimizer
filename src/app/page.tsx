@@ -1,101 +1,192 @@
-import Image from "next/image";
+"use client";
+import { useState, useEffect } from "react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import dynamic from "next/dynamic";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+
+// Dynamically import the Map component to avoid SSR issues
+const Map = dynamic(() => import("@/components/Map"), { ssr: false });
+
+// Types for order and driver
+interface Order {
+  orderId: string;
+  address: string;
+  deliveryTime: string;
+  weight: "light" | "medium" | "heavy";
+  lat: number;
+  lng: number;
+}
+
+interface Driver {
+  id: number;
+  location: { lat: number; lng: number };
+  orders: {
+    light: Order[];
+    medium: Order[];
+    heavy: Order[];
+  };
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [selectedWeight, setSelectedWeight] = useState<string>("");
+  const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [selectedAlgorithm, setSelectedAlgorithm] = useState<string>("");
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+  const [driverStats, setDriverStats] = useState({
+    totalOrders: 0,
+    totalStops: 0,
+    totalDistance: "Calculating...",
+    estimatedTime: "Calculating...",
+  });
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  // Fetch drivers and their assigned orders
+  const fetchDrivers = async () => {
+    try {
+      const response = await fetch("/api/assignedOrders", { method: "POST" });
+      if (!response.ok) throw new Error("Failed to fetch assigned orders");
+      const data = await response.json();
+      setDrivers(data.data);
+    } catch (error) {
+      console.error("Error fetching drivers:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDrivers();
+  }, []);
+
+  // Calculate statistics based on the selected driver
+  const calculateDriverStats = (driver: Driver) => {
+    const totalOrders = driver.orders.light.length + driver.orders.medium.length + driver.orders.heavy.length;
+    const allOrders = [...driver.orders.light, ...driver.orders.medium, ...driver.orders.heavy];
+    const uniqueStops = new Set(allOrders.map((order) => `${order.lat},${order.lng}`)).size;
+
+    const totalDistance = `${(uniqueStops * 3).toFixed(1)} km`;
+    const estimatedTime = `${(uniqueStops * 10).toFixed(0)} mins`;
+
+    setDriverStats({
+      totalOrders,
+      totalStops: uniqueStops,
+      totalDistance,
+      estimatedTime,
+    });
+  };
+
+  // Handler when a driver is selected
+  const handleDriverSelect = (driver: Driver) => {
+    setSelectedDriver(driver);
+    calculateDriverStats(driver);
+    setIsDrawerOpen(true);
+  };
+
+  // Handler when a weight filter is applied
+  const handleWeightChange = (weight: string) => {
+    setSelectedWeight(weight);
+  };
+
+  // Filter orders based on selected driver and weight
+  const filteredOrders = selectedDriver
+    ? selectedWeight
+      ? selectedDriver.orders[selectedWeight as keyof Driver["orders"]].sort(
+          (a, b) => a.deliveryTime.localeCompare(b.deliveryTime)
+        )
+      : [...selectedDriver.orders.light, ...selectedDriver.orders.medium, ...selectedDriver.orders.heavy]
+          .sort((a, b) => a.deliveryTime.localeCompare(b.deliveryTime))
+    : [];
+
+  return (
+    <div className="flex flex-col h-full w-full">
+{/* Top Controls */}
+<div className="flex items-center p-2 bg-gray-100 border-b border-gray-300 gap-4 justify-center sm:justify-start">
+  <SidebarTrigger className=" ml-0 mr-5 left-4 z-50 md:relative md:z-50" />
+
+  {/* Driver Dropdown */}
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button variant="outline" className="w-full sm:w-auto md:w-[12vw] lg:w-[10vw]">
+        {selectedDriver ? `Driver ${selectedDriver.id}` : "Select Driver"}
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent>
+      {drivers.map((driver) => (
+        <DropdownMenuItem key={driver.id} onClick={() => handleDriverSelect(driver)}>
+          Driver {driver.id}
+        </DropdownMenuItem>
+      ))}
+    </DropdownMenuContent>
+  </DropdownMenu>
+
+  {/* Weight Filter Dropdown */}
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button variant="outline" className="w-full sm:w-auto md:w-[12vw] lg:w-[10vw]">
+        {selectedWeight ? selectedWeight.charAt(0).toUpperCase() + selectedWeight.slice(1) : "All Weights"}
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent>
+      <DropdownMenuItem onClick={() => handleWeightChange("")}>All</DropdownMenuItem>
+      <DropdownMenuItem onClick={() => handleWeightChange("light")}>Light</DropdownMenuItem>
+      <DropdownMenuItem onClick={() => handleWeightChange("medium")}>Medium</DropdownMenuItem>
+      <DropdownMenuItem onClick={() => handleWeightChange("heavy")}>Heavy</DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+
+  {/* Algorithm Dropdown */}
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button variant="outline" className="w-full sm:w-auto md:w-[12vw] lg:w-[10vw]">
+        {selectedAlgorithm || "Optimize Routes"}
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent>
+      <DropdownMenuItem onClick={() => setSelectedAlgorithm("Routes by Delivery Time")}>Routes by Delivery Time</DropdownMenuItem>
+      <DropdownMenuItem onClick={() => setSelectedAlgorithm("Google Waypoint")}>Google Waypoint</DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+</div>
+
+
+      {/* Driver Stats Drawer */}
+      <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+        <DrawerContent className="flex flex-col justify-between h-auto max-h-[90vh] w-full p-6 rounded-lg shadow-lg bg-white">
+          <div className="flex flex-col items-center text-center space-y-4">
+            <DrawerHeader>
+              <DrawerTitle className="text-lg font-bold">Driver Details</DrawerTitle>
+              <DrawerDescription className="text-sm text-gray-600">
+                Driver {selectedDriver?.id}'s Summary:
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="space-y-2">
+              <p className="text-sm">
+                <span className="font-medium">Total Orders:</span> {driverStats.totalOrders}
+              </p>
+              <p className="text-sm">
+                <span className="font-medium">Total Stops:</span> {driverStats.totalStops}
+              </p>
+              <p className="text-sm">
+                <span className="font-medium">Total Distance:</span> {driverStats.totalDistance}
+              </p>
+              <p className="text-sm">
+                <span className="font-medium">Estimated Time:</span> {driverStats.estimatedTime}
+              </p>
+            </div>
+          </div>
+          <DrawerFooter className="w-full mt-4">
+            <Button variant="outline" className="w-full sm:w-auto" onClick={() => setIsDrawerOpen(false)}>
+              Close
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Map */}
+      <Card className="flex-grow h-[calc(100vh-200px)]">
+        <Map selectedWeight={selectedWeight} orders={filteredOrders} selectedAlgorithm={selectedAlgorithm} />
+      </Card>
     </div>
   );
 }
