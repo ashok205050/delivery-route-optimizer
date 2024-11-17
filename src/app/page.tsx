@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import dynamic from "next/dynamic";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 
 // Dynamically import the Map component to avoid SSR issues
 const Map = dynamic(() => import("@/components/Map"), { ssr: false });
@@ -100,55 +100,54 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-full w-full">
-{/* Top Controls */}
-<div className="flex items-center p-2 bg-gray-100 border-b border-gray-300 gap-4 justify-center sm:justify-start">
-  <SidebarTrigger className=" ml-0 mr-5 left-4 z-50 md:relative md:z-50" />
+      {/* Top Controls */}
+      <div className="flex items-center p-2 bg-gray-100 border-b border-gray-300 gap-4 justify-center sm:justify-start">
+        <SidebarTrigger className=" ml-0 mr-5 left-4 z-50 md:relative md:z-50" />
 
-  {/* Driver Dropdown */}
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button variant="outline" className="w-full sm:w-auto md:w-[12vw] lg:w-[10vw]">
-        {selectedDriver ? `Driver ${selectedDriver.id}` : "Select Driver"}
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent>
-      {drivers.map((driver) => (
-        <DropdownMenuItem key={driver.id} onClick={() => handleDriverSelect(driver)}>
-          Driver {driver.id}
-        </DropdownMenuItem>
-      ))}
-    </DropdownMenuContent>
-  </DropdownMenu>
+        {/* Driver Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="w-full sm:w-auto md:w-[12vw] lg:w-[10vw]">
+              {selectedDriver ? `Driver ${selectedDriver.id}` : "Select Driver"}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            {drivers.map((driver) => (
+              <DropdownMenuItem key={driver.id} onClick={() => handleDriverSelect(driver)}>
+                Driver {driver.id}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-  {/* Weight Filter Dropdown */}
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button variant="outline" className="w-full sm:w-auto md:w-[12vw] lg:w-[10vw]">
-        {selectedWeight ? selectedWeight.charAt(0).toUpperCase() + selectedWeight.slice(1) : "All Weights"}
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent>
-      <DropdownMenuItem onClick={() => handleWeightChange("")}>All</DropdownMenuItem>
-      <DropdownMenuItem onClick={() => handleWeightChange("light")}>Light</DropdownMenuItem>
-      <DropdownMenuItem onClick={() => handleWeightChange("medium")}>Medium</DropdownMenuItem>
-      <DropdownMenuItem onClick={() => handleWeightChange("heavy")}>Heavy</DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
+        {/* Weight Filter Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="w-full sm:w-auto md:w-[12vw] lg:w-[10vw]">
+              {selectedWeight ? selectedWeight.charAt(0).toUpperCase() + selectedWeight.slice(1) : "All Weights"}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => handleWeightChange("")}>All</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleWeightChange("light")}>Light</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleWeightChange("medium")}>Medium</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleWeightChange("heavy")}>Heavy</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-  {/* Algorithm Dropdown */}
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button variant="outline" className="w-full sm:w-auto md:w-[12vw] lg:w-[10vw]">
-        {selectedAlgorithm || "Optimize Routes"}
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent>
-      <DropdownMenuItem onClick={() => setSelectedAlgorithm("Routes by Delivery Time")}>Routes by Delivery Time</DropdownMenuItem>
-      <DropdownMenuItem onClick={() => setSelectedAlgorithm("Google Waypoint")}>Google Waypoint</DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
-</div>
-
+        {/* Algorithm Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="w-full sm:w-auto md:w-[12vw] lg:w-[10vw]">
+              {selectedAlgorithm || "Optimize Routes"}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => setSelectedAlgorithm("Routes by Delivery Time")}>Routes by Delivery Time</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSelectedAlgorithm("Google Waypoint")}>Google Waypoint</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
       {/* Driver Stats Drawer */}
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
@@ -157,7 +156,7 @@ export default function Home() {
             <DrawerHeader>
               <DrawerTitle className="text-lg font-bold">Driver Details</DrawerTitle>
               <DrawerDescription className="text-sm text-gray-600">
-                Driver {selectedDriver?.id}'s Summary:
+                Driver {selectedDriver?.id}&apos;s Summary:
               </DrawerDescription>
             </DrawerHeader>
             <div className="space-y-2">
@@ -185,7 +184,7 @@ export default function Home() {
 
       {/* Map */}
       <Card className="flex-grow h-[calc(100vh-200px)]">
-        <Map selectedWeight={selectedWeight} orders={filteredOrders} selectedAlgorithm={selectedAlgorithm} />
+        <Map orders={filteredOrders} selectedAlgorithm={selectedAlgorithm} />
       </Card>
     </div>
   );

@@ -5,11 +5,8 @@ import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
-  SidebarGroup,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuItem,
   SidebarMenuButton
 } from "@/components/ui/sidebar";
 import {
@@ -52,11 +49,6 @@ export function AppSidebar() {
       }
       const data = await response.json();
       setOrders(data.orders); // Assuming the API returns { orders: [...] }
-      
-      // Log lat and lng for verification
-      data.orders.forEach((order: Order) => {
-      });
-      
     } catch (error) {
       console.error("Error fetching orders:", error);
     }
@@ -71,17 +63,6 @@ export function AppSidebar() {
       }
       const data = await response.json();
       setDrivers(data.data); // Set the drivers with assigned orders
-
-      // Log lat and lng for each driver
-      data.data.forEach((driver: Driver) => {
-        driver.orders.light.forEach((order) => {
-        });
-        driver.orders.medium.forEach((order) => {
-        });
-        driver.orders.heavy.forEach((order) => {
-        });
-      });
-      
     } catch (error) {
       console.error("Error fetching drivers:", error);
     }
@@ -122,7 +103,7 @@ export function AppSidebar() {
       <SidebarHeader className="cursor-pointer font-bold">Rentkar.com</SidebarHeader>
       <hr className="border-t-2"/>
       <SidebarContent>
-        <SidebarGroup>
+        <SidebarMenu>
           {/* Button to toggle orders visibility */}
           <Button variant={"secondary"} className="bg-gray-500 hover:bg-gray-700 text-white mt-4" onClick={toggleOrders}>
             {showOrders ? "Hide Orders List" : "Show Orders List"}
@@ -185,57 +166,54 @@ export function AppSidebar() {
           <div className="flex justify-center font-semibold mt-10 underline">
             <SidebarHeader>Drivers</SidebarHeader>
           </div>
-          <SidebarMenu>
-            {drivers.map((driver) => (
-              <div key={driver.id}>
-                <Button
-                  variant={"ghost"}
-                  onClick={() => handleDriverSelect(driver)}
-                  className="cursor-pointer hover:bg-gray-300"
-                >
-                  Driver {driver.id}
-                </Button>
-                <hr className="border-t-2"/>
+          {drivers.map((driver) => (
+            <div key={driver.id}>
+              <Button
+                variant={"ghost"}
+                onClick={() => handleDriverSelect(driver)}
+                className="cursor-pointer hover:bg-gray-300"
+              >
+                Driver {driver.id}
+              </Button>
+              <hr className="border-t-2"/>
 
-                {/* Render the orders table below the driver button when selected */}
-                {selectedDriver?.id === driver.id && (
-                  <div className="mt-4">
-                    <h3 className="text-lg font-semibold">
-                      Assigned Orders for Driver {driver.id}
-                    </h3>
-                    {["light", "medium", "heavy"].map((weightCategory) => (
-                      <div key={weightCategory}>
-                        <h4 className="font-medium mt-2">{weightCategory.charAt(0).toUpperCase() + weightCategory.slice(1)} Orders</h4>
-                        <table className="table-auto w-full border mt-2">
-                          <thead>
-                            <tr>
-                              <th className="border p-1 text-xs">Order ID</th>
-                              <th className="border p-1 text-xs">Address</th>
-                              <th className="border p-1 text-xs">Delivery Time</th>
-                              <th className="border p-1 text-xs">Weight</th>
+              {/* Render the orders table below the driver button when selected */}
+              {selectedDriver?.id === driver.id && (
+                <div className="mt-4">
+                  <h3 className="text-lg font-semibold">
+                    Assigned Orders for Driver {driver.id}
+                  </h3>
+                  {["light", "medium", "heavy"].map((weightCategory) => (
+                    <div key={weightCategory}>
+                      <h4 className="font-medium mt-2">{weightCategory.charAt(0).toUpperCase() + weightCategory.slice(1)} Orders</h4>
+                      <table className="table-auto w-full border mt-2">
+                        <thead>
+                          <tr>
+                            <th className="border p-1 text-xs">Order ID</th>
+                            <th className="border p-1 text-xs">Address</th>
+                            <th className="border p-1 text-xs">Delivery Time</th>
+                            <th className="border p-1 text-xs">Weight</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {driver.orders[weightCategory as keyof Driver["orders"]].map((order) => (
+                            <tr key={order.orderId}>
+                              <td className="border p-1 text-xs">{order.orderId}</td>
+                              <td className="border p-1 text-xs">{order.address}</td>
+                              <td className="border p-1 text-xs">{order.deliveryTime}</td>
+                              <td className="border p-1 text-xs">{order.weight}</td>
                             </tr>
-                          </thead>
-                          <tbody>
-                            {driver.orders[weightCategory as keyof Driver["orders"]].map((order) => (
-                              <tr key={order.orderId}>
-                                <td className="border p-1 text-xs">{order.orderId}</td>
-                                <td className="border p-1 text-xs">{order.address}</td>
-                                <td className="border p-1 text-xs">{order.deliveryTime}</td>
-                                <td className="border p-1 text-xs">{order.weight}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </SidebarMenu>
       </SidebarContent>
     </Sidebar>
   );
 }
-

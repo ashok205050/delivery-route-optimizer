@@ -26,12 +26,11 @@ interface Order {
 }
 
 interface MapProps {
-  selectedWeight: string;
   orders: Order[]; // Orders to display based on the selected driver
   selectedAlgorithm: string; // The selected algorithm for optimization
 }
 
-export default function Map({ selectedWeight, orders, selectedAlgorithm }: MapProps) {
+export default function Map({ orders, selectedAlgorithm }: MapProps) {
   const [containerStyle, setContainerStyle] = useState(defaultContainerStyle);
   const [currentLocation] = useState<Location>({ lat: 19.125777909688953, lng: 72.85239246694378 });
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -147,7 +146,13 @@ export default function Map({ selectedWeight, orders, selectedAlgorithm }: MapPr
     if (currentLocation && optimizedOrders.length && isMapLoaded.current) {
       calculateRoute();
     }
-  }, [optimizedOrders]);
+  }, [optimizedOrders, currentLocation, calculateRoute]); // Added calculateRoute to the dependency array
+
+  useEffect(() => {
+    if (orders.length && selectedAlgorithm) {
+      optimizeRoute();
+    }
+  }, [orders, selectedAlgorithm, optimizeRoute]); // Added optimizeRoute to the dependency array
 
   if (loadError) return <div>Error loading Google Maps</div>;
   if (!isLoaded) return <div>Loading...</div>;
