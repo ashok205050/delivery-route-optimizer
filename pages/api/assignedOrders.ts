@@ -87,7 +87,7 @@ const createAdditionalDrivers = (remainingOrders: Order[], initialDrivers: Drive
 
 // Fetch Orders from the Orders API
 const fetchOrders = async (): Promise<Order[]> => {
-  const response = await fetch('http://localhost:3000/api/orders');
+  const response = await fetch('http://https://routeopt.vercel.app//api/orders');
   if (!response.ok) {
     throw new Error('Failed to fetch orders');
   }
