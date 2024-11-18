@@ -1,5 +1,3 @@
-// pages/api/optimizeRoutes.ts
-
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 // Define the Order type
@@ -9,7 +7,7 @@ interface Order {
   address: string;
   lat: number;
   lng: number;
-  deliveryTime: string; // Adjust based on your actual order data structure
+  deliveryTime: string; 
 }
 
 // Define the Driver type
@@ -48,8 +46,8 @@ const assignOrdersToDrivers = (orders: Order[], drivers: Driver[]): { assignedOr
 
       if (order.weight === 'light' && assigned.orders.light.length < capacity.light) {
         assigned.orders.light.push(order);
-        remainingOrders.splice(i, 1); // Remove assigned order
-        i--; // Adjust index after removal
+        remainingOrders.splice(i, 1); 
+        i--; 
       } else if (order.weight === 'medium' && assigned.orders.medium.length < capacity.medium) {
         assigned.orders.medium.push(order);
         remainingOrders.splice(i, 1);
@@ -67,10 +65,9 @@ const assignOrdersToDrivers = (orders: Order[], drivers: Driver[]): { assignedOr
   return { assignedOrders, remainingOrders };
 };
 
-// Helper Function to Create New Drivers If Needed
+// Function to Create New Drivers If Needed
 const createAdditionalDrivers = (remainingOrders: Order[], initialDrivers: Driver[]): Driver[] => {
-  const neededDrivers = Math.ceil(remainingOrders.length / 3); // Assume 3 orders per new driver
-
+  const neededDrivers = Math.ceil(remainingOrders.length / 3); 
   const newDrivers: Driver[] = [];
   for (let i = 0; i < neededDrivers; i++) {
     const newDriverId = initialDrivers.length + i + 1;
@@ -92,7 +89,7 @@ const fetchOrders = async (): Promise<Order[]> => {
     throw new Error('Failed to fetch orders');
   }
   const data = await response.json();
-  return data.orders; // Assuming the API returns { orders: [...] }
+  return data.orders; 
 };
 
 // Handler for the API Request

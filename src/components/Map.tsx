@@ -19,15 +19,15 @@ interface Location {
 interface Order {
   orderId: string;
   address: string;
-  deliveryTime: string; // Format: 'hh:mm AM/PM'
+  deliveryTime: string; 
   weight: string;
   lat: number;
   lng: number;
 }
 
 interface MapProps {
-  orders: Order[]; // Orders to display based on the selected driver
-  selectedAlgorithm: string; // The selected algorithm for optimization
+  orders: Order[]; 
+  selectedAlgorithm: string; 
 }
 
 export default function Map({ orders, selectedAlgorithm }: MapProps) {
@@ -37,8 +37,8 @@ export default function Map({ orders, selectedAlgorithm }: MapProps) {
   const [optimizedOrders, setOptimizedOrders] = useState<Order[]>([]);
 
   const mapRef = useRef<google.maps.Map | null>(null);
-  const directionsRendererRef = useRef<google.maps.DirectionsRenderer | null>(null); // DirectionsRenderer ref
-  const trafficLayerRef = useRef<google.maps.TrafficLayer | null>(null); // TrafficLayer ref
+  const directionsRendererRef = useRef<google.maps.DirectionsRenderer | null>(null); 
+  const trafficLayerRef = useRef<google.maps.TrafficLayer | null>(null);
   const isMapLoaded = useRef(false);
 
   const { isLoaded, loadError } = useLoadScript({
@@ -58,7 +58,7 @@ export default function Map({ orders, selectedAlgorithm }: MapProps) {
     mapRef.current = map;
 
     directionsRendererRef.current = new google.maps.DirectionsRenderer({
-      suppressMarkers: true, // Suppress markers for waypoints
+      suppressMarkers: true,
     });
     directionsRendererRef.current.setMap(map);
 
@@ -66,7 +66,7 @@ export default function Map({ orders, selectedAlgorithm }: MapProps) {
     if (!trafficLayerRef.current) {
       trafficLayerRef.current = new google.maps.TrafficLayer();
     }
-    trafficLayerRef.current.setMap(map); // Traffic layer is always visible
+    trafficLayerRef.current.setMap(map);
 
     isMapLoaded.current = true;
   };
@@ -89,7 +89,7 @@ export default function Map({ orders, selectedAlgorithm }: MapProps) {
       destination: new google.maps.LatLng(optimizedOrders[optimizedOrders.length - 1].lat, optimizedOrders[optimizedOrders.length - 1].lng),
       waypoints: waypoints,
       travelMode: google.maps.TravelMode.DRIVING,
-      optimizeWaypoints: selectedAlgorithm === "Google Waypoint", // If Google Waypoint is selected, optimize the waypoints
+      optimizeWaypoints: selectedAlgorithm === "Google Waypoint", 
     };
 
     directionsService.route(request, (result, status) => {
@@ -110,7 +110,7 @@ export default function Map({ orders, selectedAlgorithm }: MapProps) {
         optimized = optimizeByDeliveryTime(orders);
         break;
       case "Google Waypoint":
-        optimized = optimizeByDeliveryTime(orders); // Sort orders by delivery time for Google Waypoints
+        optimized = optimizeByDeliveryTime(orders); 
         break;
       default:
         optimized = orders;
@@ -120,7 +120,6 @@ export default function Map({ orders, selectedAlgorithm }: MapProps) {
   };
 
   const optimizeByDeliveryTime = (orders: Order[]): Order[] => {
-    // Sort orders by delivery time (convert from AM/PM format to a 24-hour time string)
     return orders.sort((a, b) => convertTo24HourFormat(a.deliveryTime).localeCompare(convertTo24HourFormat(b.deliveryTime)));
   };
 
@@ -129,8 +128,8 @@ export default function Map({ orders, selectedAlgorithm }: MapProps) {
     const [hours, minutes] = timePart.split(":").map(Number);
     let newHours = hours;
 
-    if (period === "AM" && hours === 12) newHours = 0; // Handle 12 AM case
-    if (period === "PM" && hours !== 12) newHours += 12; // Handle PM case
+    if (period === "AM" && hours === 12) newHours = 0; 
+    if (period === "PM" && hours !== 12) newHours += 12; 
 
     const formattedHours = newHours.toString().padStart(2, "0");
     const formattedMinutes = minutes.toString().padStart(2, "0");
@@ -146,13 +145,13 @@ export default function Map({ orders, selectedAlgorithm }: MapProps) {
     if (currentLocation && optimizedOrders.length && isMapLoaded.current) {
       calculateRoute();
     }
-  }, [optimizedOrders, currentLocation, calculateRoute]); // Added calculateRoute to the dependency array
+  }, [optimizedOrders, currentLocation, calculateRoute]); 
 
   useEffect(() => {
     if (orders.length && selectedAlgorithm) {
       optimizeRoute();
     }
-  }, [orders, selectedAlgorithm, optimizeRoute]); // Added optimizeRoute to the dependency array
+  }, [orders, selectedAlgorithm, optimizeRoute]); 
 
   if (loadError) return <div>Error loading Google Maps</div>;
   if (!isLoaded) return <div>Loading...</div>;

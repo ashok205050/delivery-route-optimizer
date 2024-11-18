@@ -1,4 +1,3 @@
-// pages/api/orders.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -30,6 +29,5 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     { orderId: "125", address: "Chembur Station", deliveryTime: "1:45 PM", weight: "light", lat: 19.0638, lng: 72.8995 }
   ];
 
-  // Send the data as a response
   res.status(200).json({ orders });
 }

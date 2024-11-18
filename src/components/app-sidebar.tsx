@@ -35,20 +35,20 @@ interface Driver {
 
 export function AppSidebar() {
   const [showOrders, setShowOrders] = useState<boolean>(false);
-  const [orders, setOrders] = useState<Order[]>([]); // State for all orders
-  const [drivers, setDrivers] = useState<Driver[]>([]); // State for drivers
-  const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null); // State for selected driver
+  const [orders, setOrders] = useState<Order[]>([]); 
+  const [drivers, setDrivers] = useState<Driver[]>([]); 
+  const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null); 
   const [selectedWeight, setSelectedWeight] = useState<string>("");
 
   // Fetch all orders from an API
   const fetchOrders = async () => {
     try {
-      const response = await fetch("/api/orders"); // Replace with your API endpoint for orders
+      const response = await fetch("/api/orders"); 
       if (!response.ok) {
         throw new Error("Failed to fetch orders");
       }
       const data = await response.json();
-      setOrders(data.orders); // Assuming the API returns { orders: [...] }
+      setOrders(data.orders);
     } catch (error) {
       console.error("Error fetching orders:", error);
     }
@@ -62,34 +62,32 @@ export function AppSidebar() {
         throw new Error("Failed to fetch assigned order");
       }
       const data = await response.json();
-      setDrivers(data.data); // Set the drivers with assigned orders
+      setDrivers(data.data);
     } catch (error) {
       console.error("Error fetching drivers:", error);
     }
   };
 
-  // Fetch data when the component mounts
   useEffect(() => {
     fetchOrders();
     fetchDrivers();
   }, []);
 
-  // Toggle orders visibility
   const toggleOrders = () => {
     setShowOrders((prev) => !prev);
   };
 
   // Handle filter change
   const handleFilterChange = (weight: string) => {
-    setSelectedWeight(weight); // Update filter and trigger re-render
+    setSelectedWeight(weight); 
   };
 
   // Handle driver selection with toggle behavior
   const handleDriverSelect = (driver: Driver) => {
     if (selectedDriver?.id === driver.id) {
-      setSelectedDriver(null); // If the same driver is clicked, hide the orders table
+      setSelectedDriver(null); 
     } else {
-      setSelectedDriver(driver); // If a different driver is clicked, show the assigned orders
+      setSelectedDriver(driver); 
     }
   };
 
@@ -104,12 +102,11 @@ export function AppSidebar() {
       <hr className="border-t-2"/>
       <SidebarContent>
         <SidebarMenu>
-          {/* Button to toggle orders visibility */}
           <Button variant={"secondary"} className="bg-gray-500 hover:bg-gray-700 text-white mt-4" onClick={toggleOrders}>
             {showOrders ? "Hide Orders List" : "Show Orders List"}
           </Button>
 
-          {/* Dropdown menu to filter by weight - Only shown when orders are visible */}
+          {/* Dropdown menu to filter by weight*/}
           {showOrders && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -135,7 +132,7 @@ export function AppSidebar() {
             </DropdownMenu>
           )}
 
-          {/* Display orders table when 'Show Orders' button is clicked */}
+          {/* Display orders table */}
           {showOrders && (
             <div className="mt-4">
               <h3 className="text-lg font-semibold">All Orders</h3>
@@ -162,7 +159,7 @@ export function AppSidebar() {
             </div>
           )}
 
-          {/* Display drivers list below the Show Orders button */}
+          {/* Display drivers list */}
           <div className="flex justify-center font-semibold mt-10 underline">
             <SidebarHeader>Drivers</SidebarHeader>
           </div>
@@ -177,7 +174,7 @@ export function AppSidebar() {
               </Button>
               <hr className="border-t-2"/>
 
-              {/* Render the orders table below the driver button when selected */}
+              {/* Render the orders, driver button when selected */}
               {selectedDriver?.id === driver.id && (
                 <div className="mt-4">
                   <h3 className="text-lg font-semibold">
